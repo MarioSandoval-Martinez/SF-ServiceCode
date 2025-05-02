@@ -296,6 +296,7 @@ def Insert_Service_Code(x):
         data=excel_data,
         file_name="ServiceCode.xlsx",
         mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        on_click="ignore"
     )
     Create_Price_Book(data)
     Create_Tariff_Rate(data)
@@ -360,6 +361,7 @@ def Insert_Price_Book(x):
         data=excel_data,
         file_name="PriceBook.xlsx",
         mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        on_click="ignore"
     )
     st.success("PriceBook Load Complete")
 
@@ -621,6 +623,7 @@ def Insert_Tariff_Rate(x):
         data=excel_data,
         file_name="ServiceCode_Upload.xlsx",
         mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        on_click="ignore"
     )
     st.success("Tariff Rate Load Complete")
 
@@ -657,7 +660,7 @@ if st.button("🔐 Login"):
                 consumer_secret=SECRET,
             )
             st.success(f"✅ Successfully authenticated to {environment}!")
-            if st.button("✅ Add to Prod"):
+            if st.button("✅ Add to Prod",on_click="ignore"):
                 Create_Service_Code(Service_path)
     except Exception as e:
         st.error(f"❌ Authentication failed: {str(e)}")
