@@ -296,7 +296,6 @@ def Insert_Service_Code(x):
         data=excel_data,
         file_name="ServiceCode.xlsx",
         mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-        on_click="ignore"
     )
     Create_Price_Book(data)
     Create_Tariff_Rate(data)
@@ -361,7 +360,6 @@ def Insert_Price_Book(x):
         data=excel_data,
         file_name="PriceBook.xlsx",
         mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-        on_click="ignore"
     )
     st.success("PriceBook Load Complete")
 
@@ -623,7 +621,6 @@ def Insert_Tariff_Rate(x):
         data=excel_data,
         file_name="ServiceCode_Upload.xlsx",
         mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-        on_click="ignore"
     )
     st.success("Tariff Rate Load Complete")
 
@@ -635,32 +632,47 @@ def Formatter_For_Insert(x):
         data.append(d)
     return data
 
-# Button to authenticate and store `sf` globally
-if st.button("🔐 Login"):
-    try:
-        # Retrieve secrets from Google Cloud
-        secrets = get_secret("Salesforce_Key", "selesforce-455620")
+# Title
+st.title("🔐 Salesforce Login + Add to Prod")
 
-        # Get credentials for the selected environment
+# 1) LOGIN SECTION
+SF_UserName = st.text_input("🔄 Salesforce User Name")
+SF_Password = st.text_input("🔄 Salesforce Password", type="password")
+login_clicked = st.button("🔐 Login")
+
+if login_clicked:
+    try:
+        secrets = get_secret("Salesforce_Key", "selesforce-455620")
         env_data = secrets.get(environment, {})
         URL = env_data.get("url")
         KEY = env_data.get("key")
         SECRET = env_data.get("secret")
-
-        # Validate retrieved credentials
-        if not URL or not KEY or not SECRET:
+        if not (URL and KEY and SECRET):
             st.error(f"⚠️ Missing credentials for {environment}")
         else:
-            # Authenticate with Salesforce
             st.session_state.sf = Salesforce(
                 username=SF_UserName,
-                instance_url=URL,
                 password=SF_Password,
+                instance_url=URL,
                 consumer_key=KEY,
                 consumer_secret=SECRET,
             )
             st.success(f"✅ Successfully authenticated to {environment}!")
-            if st.button("✅ Add to Prod",on_click="ignore"):
-                Create_Service_Code(Service_path)
     except Exception as e:
-        st.error(f"❌ Authentication failed: {str(e)}")
+        st.error(f"❌ Authentication failed: {e}")
+
+# 2) ADD TO PROD SECTION
+# Only show “Add to Prod” once we've stored st.session_state.sf
+if "sf" in st.session_state:
+    st.write("You are logged in.  Ready to push to Production:")
+    add_clicked = st.button("✅ Add to Prod")
+    if add_clicked:
+        # Service_path must have been set already by your upload logic
+        if Service_path is None:
+            st.error("Please upload the service file first.")
+        else:
+            try:
+                Create_Service_Code(Service_path)
+                st.success("🎉 Service code pushed to Production!")
+            except Exception as e:
+                st.error(f"Error during production push: {e}")
