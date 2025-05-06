@@ -36,6 +36,7 @@ Service_file = st.file_uploader("📂 Upload Service Code File", type=["xlsx"])
 Service_path = None
 salesforce_path = None
 sf_conn = None
+
 if Service_file:
     Service_path = os.path.join(TEMP_FOLDER, Service_file.name)
     with open(Service_path, "wb") as f:
@@ -651,7 +652,6 @@ if login_clicked:
         if not (URL and KEY and SECRET):
             st.error(f"⚠️ Missing credentials for {environment}")
         else:
-            global sf_conn
             sf_conn = Salesforce(
             username=SF_UserName,
             password=SF_Password,
