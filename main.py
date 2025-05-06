@@ -653,11 +653,11 @@ if login_clicked:
         else:
             global sf_conn
             sf_conn = Salesforce(
-          username=SF_UserName,
-          password=SF_Password,
-          instance_url=URL,         # or domain="login"/"test"
-          client_id=KEY,            # optional
-          client_secret=SECRET      # optional
+            username=SF_UserName,
+            password=SF_Password,
+            instance_url=URL,
+            consumer_key=KEY,
+            consumer_secret=SECRET,
         )
         st.session_state["sf"] = sf_conn
         st.success("✅ Logged in to Salesforce")
