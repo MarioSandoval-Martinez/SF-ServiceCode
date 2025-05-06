@@ -61,8 +61,7 @@ login_clicked = st.button(
     key="login_button"       # <-- also give your buttons keys if you get duplicates
 )
 
-if login_clicked:
-    login_to_salesforce()
+
     
 def login_to_salesforce():
     global sf_conn
@@ -86,6 +85,9 @@ def login_to_salesforce():
     except Exception as e:
         st.error(f"❌ Authentication failed: {e}")
 
+if login_clicked:
+    login_to_salesforce()
+    
 # 2) ADD TO PROD SECTION
 # Only show “Add to Prod” once we've stored st.session_state.sf
 if "sf" in st.session_state:
