@@ -636,9 +636,19 @@ def Formatter_For_Insert(x):
 st.title("🔐 Salesforce Login + Add to Prod")
 
 # 1) LOGIN SECTION
-SF_UserName = st.text_input("🔄 Salesforce User Name")
-SF_Password = st.text_input("🔄 Salesforce Password", type="password")
-login_clicked = st.button("🔐 Login")
+SF_UserName = st.text_input(
+    "🔄 Salesforce User Name",
+    key="sf_username"        # <-- unique key
+)
+SF_Password = st.text_input(
+    "🔄 Salesforce Password",
+    type="password",
+    key="sf_password"        # <-- unique key
+)
+login_clicked = st.button(
+    "🔐 Login",
+    key="login_button"       # <-- also give your buttons keys if you get duplicates
+)
 
 if login_clicked:
     try:
