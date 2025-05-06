@@ -652,6 +652,7 @@ if login_clicked:
         if not (URL and KEY and SECRET):
             st.error(f"⚠️ Missing credentials for {environment}")
         else:
+            global sf_conn
             sf_conn = Salesforce(
             username=SF_UserName,
             password=SF_Password,
