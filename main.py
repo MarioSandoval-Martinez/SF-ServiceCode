@@ -189,12 +189,6 @@ st.title("🔐 Salesforce Login")
 
 # Salesforce environment
 environment = "PROD"
-
-# Input fields for username and password
-SF_UserName = st.text_input("🔄 Salesforce User Name")
-SF_Password = st.text_input("🔄 Salesforce Password", type="password")
-
-
 # Convert DataFrame to Excel in memory
 def to_excel_buffer(df):
     output = BytesIO()
