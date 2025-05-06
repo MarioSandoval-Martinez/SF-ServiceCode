@@ -268,6 +268,7 @@ def Create_Service_Code(x):
 
 
 def Insert_Service_Code(x):
+    sf_conn = st.session_state.get("sf_conn", None)
     x_copy = x.copy()
     x_copy["GearsetExternalId__c"] = ""
     Update_Data = []
@@ -336,6 +337,7 @@ def Create_Price_Book(x):
 
 
 def Insert_Price_Book(x):
+    sf_conn = st.session_state.get("sf_conn", None)
     x_copy = x.copy()
     x_copy["GearsetExternalId__c"] = ""
     Update_Data = []
@@ -603,6 +605,7 @@ def Create_Tariff_Rate(x):
 
 
 def Insert_Tariff_Rate(x):
+    sf_conn = st.session_state.get("sf_conn", None)
     x_copy = x.copy()
     data = Formatter_For_Insert(x=x_copy)
     results = sf_conn.bulk.lcpq_Tariff_Rate_Table__c.insert(data, batch_size=5000)
@@ -646,7 +649,6 @@ login_clicked = st.button(
 
     
 def login_to_salesforce():
-    global sf_conn
     try:
         secrets = get_secret("Salesforce_Key", "selesforce-455620")
         env_data = secrets.get(environment, {})
@@ -664,6 +666,7 @@ def login_to_salesforce():
             consumer_secret=SECRET,
         )
         st.success("✅ Logged in to Salesforce")
+        st.session_state.sf_conn = sf_conn
         st.session_state.sf = True
     except Exception as e:
         st.error(f"❌ Authentication failed: {e}")
