@@ -660,8 +660,8 @@ if login_clicked:
           client_id=KEY,            # optional
           client_secret=SECRET      # optional
         )
-    st.session_state["sf"] = sf_conn
-    st.success("✅ Logged in to Salesforce")
+        st.session_state["sf"] = sf_conn
+        st.success("✅ Logged in to Salesforce")
     except Exception as e:
         sf_conn = None
         st.error(f"❌ Authentication failed: {e}")
