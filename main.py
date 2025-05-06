@@ -655,7 +655,6 @@ if login_clicked:
             sf_conn = Salesforce(
           username=SF_UserName,
           password=SF_Password,
-          security_token=SF_Token,
           instance_url=URL,         # or domain="login"/"test"
           client_id=KEY,            # optional
           client_secret=SECRET      # optional
