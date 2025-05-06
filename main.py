@@ -79,7 +79,6 @@ if login_clicked:
             consumer_key=KEY,
             consumer_secret=SECRET,
         )
-        st.session_state["sf"] = sf_conn
         st.success("✅ Logged in to Salesforce")
     except Exception as e:
         sf_conn = None
