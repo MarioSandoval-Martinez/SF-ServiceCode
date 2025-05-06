@@ -184,9 +184,6 @@ def get_secret(secret_id, project_id="selesforce-455620"):
 
     return json.loads(secret_data)  # Convert JSON string to Python dictionary
 
-
-st.title("🔐 Salesforce Login")
-
 # Salesforce environment
 environment = "PROD"
 # Convert DataFrame to Excel in memory
