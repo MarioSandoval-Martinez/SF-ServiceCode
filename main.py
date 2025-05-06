@@ -683,6 +683,7 @@ if "sf" in st.session_state:
             # Read the Excel file into df
             df = pd.read_excel(Service_path)
             try:
+                st.success(print(sf_conn))
                 Create_Service_Code(df)
                 st.success("🎉 Service code pushed to Production!")
             except Exception as e:
