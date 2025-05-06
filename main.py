@@ -43,68 +43,6 @@ if Service_file:
         f.write(Service_file.getbuffer())
     st.success(f"✅ Service code file saved")
 
-# Title
-st.title("🔐 Salesforce Login + Add to Prod")
-
-# 1) LOGIN SECTION
-SF_UserName = st.text_input(
-    "🔄 Salesforce User Name",
-    key="sf_username"        # <-- unique key
-)
-SF_Password = st.text_input(
-    "🔄 Salesforce Password",
-    type="password",
-    key="sf_password"        # <-- unique key
-)
-login_clicked = st.button(
-    "🔐 Login",
-    key="login_button"       # <-- also give your buttons keys if you get duplicates
-)
-
-
-    
-def login_to_salesforce():
-    global sf_conn
-    try:
-        secrets = get_secret("Salesforce_Key", "selesforce-455620")
-        env_data = secrets.get(environment, {})
-        URL = env_data.get("url")
-        KEY = env_data.get("key")
-        SECRET = env_data.get("secret")
-        if not (URL and KEY and SECRET):
-            st.error(f"⚠️ Missing credentials for {environment}")
-        else:
-            sf_conn = Salesforce(
-            username=SF_UserName,
-            password=SF_Password,
-            instance_url=URL,
-            consumer_key=KEY,
-            consumer_secret=SECRET,
-        )
-        st.success("✅ Logged in to Salesforce")
-    except Exception as e:
-        st.error(f"❌ Authentication failed: {e}")
-
-if login_clicked:
-    login_to_salesforce()
-    
-# 2) ADD TO PROD SECTION
-# Only show “Add to Prod” once we've stored st.session_state.sf
-if "sf" in st.session_state:
-    st.write("You are logged in.  Ready to push to Production:")
-    add_clicked = st.button("✅ Add to Prod")
-    if add_clicked:
-        if Service_path is None:
-            st.error("Please upload the service file first.")
-        else:
-            # Read the Excel file into df
-            df = pd.read_excel(Service_path)
-            try:
-                Create_Service_Code(df)
-                st.success("🎉 Service code pushed to Production!")
-            except Exception as e:
-                st.error(f"Error during production push: {e}")
-
 
 # Your allowed sets
 allowed_sets = {
@@ -687,3 +625,64 @@ def Formatter_For_Insert(x):
         data.append(d)
     return data
 
+# Title
+st.title("🔐 Salesforce Login + Add to Prod")
+
+# 1) LOGIN SECTION
+SF_UserName = st.text_input(
+    "🔄 Salesforce User Name",
+    key="sf_username"        # <-- unique key
+)
+SF_Password = st.text_input(
+    "🔄 Salesforce Password",
+    type="password",
+    key="sf_password"        # <-- unique key
+)
+login_clicked = st.button(
+    "🔐 Login",
+    key="login_button"       # <-- also give your buttons keys if you get duplicates
+)
+
+
+    
+def login_to_salesforce():
+    global sf_conn
+    try:
+        secrets = get_secret("Salesforce_Key", "selesforce-455620")
+        env_data = secrets.get(environment, {})
+        URL = env_data.get("url")
+        KEY = env_data.get("key")
+        SECRET = env_data.get("secret")
+        if not (URL and KEY and SECRET):
+            st.error(f"⚠️ Missing credentials for {environment}")
+        else:
+            sf_conn = Salesforce(
+            username=SF_UserName,
+            password=SF_Password,
+            instance_url=URL,
+            consumer_key=KEY,
+            consumer_secret=SECRET,
+        )
+        st.success("✅ Logged in to Salesforce")
+    except Exception as e:
+        st.error(f"❌ Authentication failed: {e}")
+
+if login_clicked:
+    login_to_salesforce()
+    
+# 2) ADD TO PROD SECTION
+# Only show “Add to Prod” once we've stored st.session_state.sf
+if "sf" in st.session_state:
+    st.write("You are logged in.  Ready to push to Production:")
+    add_clicked = st.button("✅ Add to Prod")
+    if add_clicked:
+        if Service_path is None:
+            st.error("Please upload the service file first.")
+        else:
+            # Read the Excel file into df
+            df = pd.read_excel(Service_path)
+            try:
+                Create_Service_Code(df)
+                st.success("🎉 Service code pushed to Production!")
+            except Exception as e:
+                st.error(f"Error during production push: {e}")
