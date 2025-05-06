@@ -668,12 +668,13 @@ if "sf" in st.session_state:
     st.write("You are logged in.  Ready to push to Production:")
     add_clicked = st.button("✅ Add to Prod")
     if add_clicked:
-        # Service_path must have been set already by your upload logic
         if Service_path is None:
             st.error("Please upload the service file first.")
         else:
+            # Read the Excel file into df
+            df = pd.read_excel(Service_path)
             try:
-                Create_Service_Code(Service_path)
+                Create_Service_Code(df)
                 st.success("🎉 Service code pushed to Production!")
             except Exception as e:
                 st.error(f"Error during production push: {e}")
