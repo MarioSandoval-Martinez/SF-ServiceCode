@@ -62,7 +62,6 @@ login_clicked = st.button(
 )
 
 if login_clicked:
-    global sf_conn
     try:
         secrets = get_secret("Salesforce_Key", "selesforce-455620")
         env_data = secrets.get(environment, {})
@@ -72,6 +71,7 @@ if login_clicked:
         if not (URL and KEY and SECRET):
             st.error(f"⚠️ Missing credentials for {environment}")
         else:
+            global sf_conn
             sf_conn = Salesforce(
             username=SF_UserName,
             password=SF_Password,
@@ -81,7 +81,6 @@ if login_clicked:
         )
         st.success("✅ Logged in to Salesforce")
     except Exception as e:
-        sf_conn = None
         st.error(f"❌ Authentication failed: {e}")
 
 # 2) ADD TO PROD SECTION
