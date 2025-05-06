@@ -664,6 +664,7 @@ def login_to_salesforce():
             consumer_secret=SECRET,
         )
         st.success("✅ Logged in to Salesforce")
+        st.session_state.sf = True
     except Exception as e:
         st.error(f"❌ Authentication failed: {e}")
 
