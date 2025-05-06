@@ -270,7 +270,7 @@ def Insert_Service_Code(x):
     x_copy["GearsetExternalId__c"] = ""
     Update_Data = []
     data = Formatter_For_Insert(x=x_copy)
-    results = st.sf.bulk.Product2.insert(data, batch_size=200)
+    results = sf_conn.bulk.Product2.insert(data, batch_size=200)
     for i, result in enumerate(results):
         if result["id"] is not None:
             data[i]["id"] = result["id"]
@@ -279,7 +279,7 @@ def Insert_Service_Code(x):
             Update_Data.append(data_dict)
         elif results["message"] is not None:
             st.warning(f"Issue with row{i} error message {results['message']}")
-    update = st.sf.bulk.Product2.update(Update_Data, batch_size=200)
+    update = sf_conn.bulk.Product2.update(Update_Data, batch_size=200)
     excel_data = to_excel_buffer(x_copy)
     st.success("Service Code Load Complete")
     st.download_button(
@@ -338,13 +338,13 @@ def Insert_Price_Book(x):
     x_copy["GearsetExternalId__c"] = ""
     Update_Data = []
     data = Formatter_For_Insert(x=x_copy)
-    results = st.sf.bulk.PricebookEntry.insert(data, batch_size=200)
+    results = sf_conn.bulk.PricebookEntry.insert(data, batch_size=200)
     for i, result in enumerate(results):
         data[i]["id"] = result["id"]
         x_copy.at[i, "GearsetExternalId__c"] = result["id"][::-1]
         data_dict = {"id": result["id"], "GearsetExternalId__c": result["id"][::-1]}
         Update_Data.append(data_dict)
-    update = st.sf.bulk.PricebookEntry.update(Update_Data, batch_size=200)
+    update = sf_conn.bulk.PricebookEntry.update(Update_Data, batch_size=200)
     excel_data = to_excel_buffer(x_copy)
     st.download_button(
         label="📥 Download PriceBook Excel File",
@@ -603,7 +603,7 @@ def Create_Tariff_Rate(x):
 def Insert_Tariff_Rate(x):
     x_copy = x.copy()
     data = Formatter_For_Insert(x=x_copy)
-    results = st.sf.bulk.lcpq_Tariff_Rate_Table__c.insert(data, batch_size=5000)
+    results = sf_conn.bulk.lcpq_Tariff_Rate_Table__c.insert(data, batch_size=5000)
     for i, result in enumerate(results):
         data[i]["id"] = result["id"]
     excel_data = to_excel_buffer(x_copy)
@@ -651,15 +651,19 @@ if login_clicked:
         if not (URL and KEY and SECRET):
             st.error(f"⚠️ Missing credentials for {environment}")
         else:
-            st.session_state.sf = Salesforce(
-                username=SF_UserName,
-                password=SF_Password,
-                instance_url=URL,
-                consumer_key=KEY,
-                consumer_secret=SECRET,
-            )
-            st.success(f"✅ Successfully authenticated to {environment}!")
+            global sf_conn
+            sf_conn = Salesforce(
+          username=SF_UserName,
+          password=SF_Password,
+          security_token=SF_Token,
+          instance_url=URL,         # or domain="login"/"test"
+          client_id=KEY,            # optional
+          client_secret=SECRET      # optional
+        )
+    st.session_state["sf"] = sf_conn
+    st.success("✅ Logged in to Salesforce")
     except Exception as e:
+        sf_conn = None
         st.error(f"❌ Authentication failed: {e}")
 
 # 2) ADD TO PROD SECTION
