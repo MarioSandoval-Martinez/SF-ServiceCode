@@ -684,7 +684,7 @@ if "sf" in st.session_state:
             st.error("Please upload the service file first.")
         else:
             # Read the Excel file into df
-            df = pd.read_excel(Service_path)
+            df = pd.read_excel(Service_path,dtype=str)
             try:
                 st.success(print(sf_conn))
                 Create_Service_Code(df)
