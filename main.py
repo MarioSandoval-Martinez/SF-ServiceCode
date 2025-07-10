@@ -229,7 +229,8 @@ def Create_Service_Code(x):
         "SBQQ__ConfigurationEvent__c",
         "SBQQ__HidePriceInSearchResults__c",
         "SBQQ__ExcludeFromOpportunity__c",
-        "SBQQ__HidePriceInSearchResults__c"
+        "SBQQ__HidePriceInSearchResults__c",
+        "lcpq_Line_Of_Service__c"
     ]
     feature = pd.DataFrame(columns=Column_header)
     for i, item in enumerate(x["Name"]):
@@ -264,7 +265,8 @@ def Create_Service_Code(x):
             "None",
             True,
             True,
-            True
+            True,
+            "Warehousing"
         ] 
     Insert_Service_Code(feature)
 
