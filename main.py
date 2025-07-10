@@ -17,7 +17,7 @@ os.makedirs(TEMP_FOLDER, exist_ok=True)
 timestr = strftime("%Y%m%d_%H%M%S_")
 
 # Streamlit UI
-st.title("Salesforce Acquisition Duplicate Processing Tool")
+st.title("Salesforce Acquisition Duplicate Processing Tool V2")
 
 # Key uploader
 Key_file = st.file_uploader("📂 Upload Key File", type=["json"])
