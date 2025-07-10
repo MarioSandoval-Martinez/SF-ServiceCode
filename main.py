@@ -7,6 +7,10 @@ import json
 from time import sleep, strftime
 from io import BytesIO
 
+# Buffer to hold the final Excel workbook
+final_excel_buffer = BytesIO()
+excel_writer = pd.ExcelWriter(final_excel_buffer, engine="xlsxwriter")
+
 # Define a temporary folder for storing uploaded and generated files
 TEMP_FOLDER = "temp"
 os.makedirs(TEMP_FOLDER, exist_ok=True)
@@ -188,15 +192,7 @@ def get_secret(secret_id, project_id="selesforce-455620"):
 
 # Salesforce environment
 environment = "PROD"
-# Convert DataFrame to Excel in memory
-def to_excel_buffer(df):
-    output = BytesIO()
-    with pd.ExcelWriter(output, engine="xlsxwriter") as writer:
-        df.to_excel(writer, index=False, sheet_name="Sheet1")
-    output.seek(0)
-    return output
 
-     
 def Create_Service_Code(x):
     Column_header = [
         "Name",
@@ -229,24 +225,23 @@ def Create_Service_Code(x):
         "SBQQ__ConfigurationEvent__c",
         "SBQQ__HidePriceInSearchResults__c",
         "SBQQ__ExcludeFromOpportunity__c",
-        "SBQQ__HidePriceInSearchResults__c",
         "lcpq_Line_Of_Service__c"
     ]
     feature = pd.DataFrame(columns=Column_header)
-    for i, item in enumerate(x["Name"]):
+    for i, row in x.iterrows():
         feature.loc[len(feature.index)] = [
-            x["Name"][i],
-            x["ProductCode"][i],
-            x["Unit_of_Measurement__c"][i],
-            x["Description"][i],
-            x["lcpq_Invoice_Type_Code__c"][i],
-            x["lcpq_Rebill_Passthrough_Service__c"][i],
-            x["lcpq_Standard_vs_Non_Standard_UOM__c"][i],
-            x["lcpq_Service_Code_Categorization__c"][i],
-            x["Charge_Break_Flag__c"][i],
-            x["Charge_Type_Code__c"][i],
-            x["lcpq_Document_Service_Description__c"][i],
-            x["lcpq_Catalog_Category__c"][i],
+            row["Name"],
+            row["ProductCode"],
+            row["Unit_of_Measurement__c"],
+            row["Description"],
+            row["lcpq_Invoice_Type_Code__c"],
+            row["lcpq_Rebill_Passthrough_Service__c"],
+            row["lcpq_Standard_vs_Non_Standard_UOM__c"],
+            row["lcpq_Service_Code_Categorization__c"],
+            row["Charge_Break_Flag__c"],
+            row["Charge_Type_Code__c"],
+            row["lcpq_Document_Service_Description__c"],
+            row["lcpq_Catalog_Category__c"],
             False,
             "1",
             False,
@@ -254,16 +249,15 @@ def Create_Service_Code(x):
             "Fixed Price",
             "Renewable",
             True,
-            x["lcpq_DG_Boxing_Defrost_Language__c"][i],
-            x["lcpq_Exclude_from_Documents__c"][i],
+            row["lcpq_DG_Boxing_Defrost_Language__c"],
+            row["lcpq_Exclude_from_Documents__c"],
             "MPT",
             True,
-            x["lcpq_Rollup_Category__c"][i],
-            x["lcpq_Subcategory__c"][i],
-            x["SBQQ__ConfigurationType__c"][i],
-            x["lcpq_Per_Order_Min_Flag__c"][i],
+            row["lcpq_Rollup_Category__c"],
+            row["lcpq_Subcategory__c"],
+            row["SBQQ__ConfigurationType__c"],
+            row["lcpq_Per_Order_Min_Flag__c"],
             "None",
-            True,
             True,
             True,
             "Warehousing"
@@ -287,16 +281,25 @@ def Insert_Service_Code(x):
         elif results["message"] is not None:
             st.warning(f"Issue with row{i} error message {results['message']}")
     update = sf_conn.bulk.Product2.update(Update_Data, batch_size=200)
-    excel_data = to_excel_buffer(x_copy)
     st.success("Service Code Load Complete")
-    st.download_button(
-        label="📥 Download Service Code Excel File",
-        data=excel_data,
-        file_name="ServiceCode.xlsx",
-        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-    )
-    Create_Price_Book(data)
-    Create_Tariff_Rate(data)
+   # Generate the other sheets
+    pricebook_df = Create_Price_Book(data)
+    tariff_df = Create_Tariff_Rate(data)
+
+    # Write all DataFrames to one Excel file
+    excel_file_path =  os.path.join(TEMP_FOLDER, f"{timestr}Salesforce_Upload.xlsx")
+    with pd.ExcelWriter(excel_file_path, engine="openpyxl") as writer:
+        x_copy.to_excel(writer, sheet_name="ServiceCode", index=False)
+        pricebook_df.to_excel(writer, sheet_name="PriceBook", index=False)
+        tariff_df.to_excel(writer, sheet_name="TariffRate", index=False)
+
+    with open(excel_file_path, "rb") as f:
+        st.download_button(
+            label="📥 Download All Salesforce Uploads",
+            data=f,
+            file_name="Salesforce_Upload.xlsx",
+            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        )
 
 
 def Create_Price_Book(x):
@@ -337,7 +340,7 @@ def Create_Price_Book(x):
             x[i]["id"],
             0,
         ]
-    Insert_Price_Book(feature)
+    return Insert_Price_Book(feature)
 
 
 def Insert_Price_Book(x):
@@ -353,14 +356,9 @@ def Insert_Price_Book(x):
         data_dict = {"id": result["id"], "GearsetExternalId__c": result["id"][::-1]}
         Update_Data.append(data_dict)
     update = sf_conn.bulk.PricebookEntry.update(Update_Data, batch_size=200)
-    excel_data = to_excel_buffer(x_copy)
-    st.download_button(
-        label="📥 Download PriceBook Excel File",
-        data=excel_data,
-        file_name="PriceBook.xlsx",
-        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-    )
+    df = pd.DataFrame(x_copy)
     st.success("PriceBook Load Complete")
+    return df
 
 
 def Create_Tariff_Rate(x):
@@ -605,7 +603,7 @@ def Create_Tariff_Rate(x):
                 9999,
                 "20250101_20251231_" + y + "_" + x[i]["ProductCode"],
             ]
-    Insert_Tariff_Rate(feature)
+    return Insert_Tariff_Rate(feature)
 
 
 def Insert_Tariff_Rate(x):
@@ -615,14 +613,9 @@ def Insert_Tariff_Rate(x):
     results = sf_conn.bulk.lcpq_Tariff_Rate_Table__c.insert(data, batch_size=5000)
     for i, result in enumerate(results):
         data[i]["id"] = result["id"]
-    excel_data = to_excel_buffer(x_copy)
-    st.download_button(
-        label="📥 Download Tariff Rate Excel File",
-        data=excel_data,
-        file_name="ServiceCode_Upload.xlsx",
-        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-    )
     st.success("Tariff Rate Load Complete")
+    df = pd.DataFrame(x_copy)
+    return df
 
 def Formatter_For_Insert(x):
     data = []
@@ -690,7 +683,7 @@ if "sf" in st.session_state:
             # Read the Excel file into df
             df = pd.read_excel(Service_path,dtype={"ProductCode": str})
             try:
-                st.success(print(sf_conn))
+                st.success(f"Connected to Salesforce")
                 Create_Service_Code(df)
                 st.success("🎉 Service code pushed to Production!")
             except Exception as e:
